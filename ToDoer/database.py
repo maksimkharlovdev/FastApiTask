@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from sqlite3 import Connection
+from sqlite3 import Connection, IntegrityError
 
 
 class Database():
@@ -21,8 +21,13 @@ class Database():
 
     def add(self, title, description='без описания'):
         self.connection = sqlite3.connect(self.path)
-        self.connection.execute(f"INSERT INTO Tasks (title, description, completed) VALUES ("
+        try:
+            self.connection.execute(f"INSERT INTO Tasks (title, description, completed) VALUES ("
                                 f"'{title}', '{description}', '{False}' );")
+        except IntegrityError:
+            self.connection.commit()
+            self.connection.close()
+            return self.update(title,description)
         self.connection.commit()
         self.connection.close()
 
@@ -47,7 +52,7 @@ class Database():
 
     def update(self, title, description, completed = False):
         self.connection = sqlite3.connect(self.path)
-        self.connection.execute(f"UPDATE Tasks SET title='{title}', description='{description}', completed='{completed}';")
+        self.connection.execute(f"UPDATE Tasks SET description='{description}', completed='{completed}' WHERE title = '{title}';")
         self.connection.commit()
         self.connection.close()
 

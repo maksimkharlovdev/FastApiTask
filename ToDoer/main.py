@@ -1,7 +1,4 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List, Optional
-from uuid import uuid4
+from fastapi import FastAPI, HTTPException, Body
 from database import Database
 
 app = FastAPI(title="ToDoer", version="1.0")
@@ -10,20 +7,29 @@ db = Database()
 @app.get("/")
 async def root():
     return {
-        "message": "УРААА!",
+        "message": "Welcome!",
         "endpoints": {
-            "GET /items": "Получить все товары"
+            "GET /items": "Get all tasks",
+            "GET /items?{...}": "Get task",
+            "POST /items": "Add task",
         }
     }
 
-@app.get("/tasks")
+@app.get("/items")
 async def get_all_tasks():
     return db.get()
 
-@app.get("/tasks/{title}")
-async def add_task(title):
-    return db.get(title)
+@app.get("/items/{title}")
+async def get_task(title):
+    try:
+        return db.get(title)
+    except Exception:
+        raise HTTPException(status_code=404, detail="Task not gound")
 
-@app.post("/tasks/{title}")
-async def get_items(title):
-    return db.add(title)
+@app.post("/items")
+async def add_task(title:str = Body(...), description:str = Body(...)):
+    if description:
+        db.add(title, description)
+        return {"msg":"Done"}
+    else:
+        db.add(title)

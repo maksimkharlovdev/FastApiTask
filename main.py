@@ -4,7 +4,7 @@ from fastapi.responses import RedirectResponse
 import sqlite3
 import string, random
 
-app = FastAPI(title="URL Shortener with SQLite")
+app = FastAPI(title="ShortUrler")
 
 # ===== Модель для POST запроса =====
 class URLItem(BaseModel):
